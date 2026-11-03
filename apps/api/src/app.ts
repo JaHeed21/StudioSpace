@@ -1,7 +1,7 @@
 import cors from "cors";
 import express from "express";
 import { rateLimit } from "express-rate-limit";
-import helmet from "helmet";
+import { default as helmet } from "helmet";
 import { toNodeHandler } from "better-auth/node";
 import type { Db } from "mongodb";
 import { env } from "./config/env.js";
