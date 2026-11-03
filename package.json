@@ -1,0 +1,23 @@
+{
+  "name": "studiospace",
+  "private": true,
+  "workspaces": [
+    "apps/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w @studiospace/api\" \"npm run dev -w @studiospace/web\"",
+    "build": "npm run build -w @studiospace/api && npm run build -w @studiospace/web",
+    "typecheck": "npm run typecheck -w @studiospace/api && npm run typecheck -w @studiospace/web",
+    "lint": "npm run lint -w @studiospace/api && npm run lint -w @studiospace/web",
+    "db:check": "npm run db:check -w @studiospace/api",
+    "test:health": "npm run test:health -w @studiospace/api",
+    "test:auth": "npm run test:auth -w @studiospace/api",
+    "test:bookings": "npm run test:bookings -w @studiospace/api",
+    "test:api": "npm run test -w @studiospace/api",
+    "seed:demo": "npm run seed:demo -w @studiospace/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
