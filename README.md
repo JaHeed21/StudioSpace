@@ -43,7 +43,32 @@ With MongoDB available and the API environment configured:
 
 The health endpoint reports `{ "status": "ok", "database": "connected" }` only when MongoDB responds to a ping; otherwise it returns an error response. Better Auth endpoints are mounted at `/api/auth/*`. Authenticated application routes include `GET /api/me` and `GET /api/admin`; regular users receive 403 from the latter. The protected `/dashboard` page includes host booking management and logout.
 
-For a Vercel API deployment, set the project root to `apps/api` and use the Express framework preset. Configure `MONGODB_URI`, `MONGODB_DB`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (the deployed API origin), and `WEB_ORIGIN` (the deployed frontend origin) in the Production environment, then redeploy. Do not set `PORT`; Vercel manages it.
+## Vercel deployment
+
+Deploy the frontend and API as separate Vercel projects:
+
+### API project
+
+1. Set the project **Root Directory** to `apps/api` and the **Framework Preset** to Express.
+2. Add these variables to the **Production** environment:
+   - `MONGODB_URI`: the MongoDB Atlas connection string. Percent-encode reserved characters in the database user's password.
+   - `MONGODB_DB`: the database name.
+   - `BETTER_AUTH_SECRET`: a private random secret of at least 32 characters.
+   - `BETTER_AUTH_URL`: the deployed API origin, for example `https://your-api.vercel.app` (no trailing slash or `/api`).
+   - `WEB_ORIGIN`: the deployed frontend origin, for example `https://your-web.vercel.app` (no trailing slash or path). Multiple allowed origins can be comma-separated.
+   - `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`: optional; set both to enable Google sign-in.
+   - `IMGBB_API_KEY`: optional; set to enable image uploads.
+3. Do not set `PORT`; Vercel provides the runtime port. Ensure the MongoDB Atlas cluster is running and its Network Access settings allow connections from the deployed API.
+4. Redeploy after adding or changing environment variables.
+
+### Frontend project
+
+1. Set the project **Root Directory** to `apps/web`.
+2. Add `NEXT_PUBLIC_API_URL` to the **Production** environment with the API base URL, for example `https://your-api.vercel.app/api`.
+   This value is public and is included in browser code; never put secrets in a `NEXT_PUBLIC_` variable. If Vercel warns about the public prefix, keep the prefix because the browser needs this URL to call the API.
+3. Redeploy after adding or changing the variable because Next.js embeds `NEXT_PUBLIC_` values during the build.
+
+For Preview deployments, configure the corresponding variables in the Preview environment as well. Add each frontend preview origin to the API's `WEB_ORIGIN` if browser requests from previews should be allowed. The API root `/` is not a web page; use `/api/health` to check API and database connectivity. Google OAuth deployments must also use the production callback URL `https://<api-domain>/api/auth/callback/google` in the Google Cloud authorized redirect URIs.
 
 Authentication uses Better Auth's database-backed sessions and HttpOnly cookies, not JWT. Browser requests use credentials and the API allows the configured `WEB_ORIGIN`. Cookies are `SameSite=Lax` in development and `SameSite=None; Secure` in production to support cross-site frontend/API deployments. For Safari deployments on unrelated domains, use a same-site reverse proxy because third-party cookie blocking may prevent session persistence.
 
